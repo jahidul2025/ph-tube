@@ -1,3 +1,12 @@
+
+function removeActiveClass() {
+    const activeButtons = document.getElementsByClassName("active");
+    for (let btn of activeButtons) {
+        btn.classList.remove("active");
+    }
+}
+
+
 function loadCategories() {
     // fetch the data
     fetch("https://openapi.programming-hero.com/api/phero-tube/categories")
@@ -9,16 +18,48 @@ function loadCategories() {
 function loadVideos() {
     fetch("https://openapi.programming-hero.com/api/phero-tube/videos")
         .then((res) => res.json())
-        .then((data) => displayVideos(data.videos));
+        .then((data) =>{
+            removeActiveClass();
+            document.getElementById("btn-all").classList.add("active");
+             displayVideos(data.videos);
+        });
 }
-
-
 
 
 // {
 //     "category_id": "1001",
 //         "category": "Music"
 // }
+const loadCategoryVideos = (id) => {
+    const url = `https://openapi.programming-hero.com/api/phero-tube/category/${id}`;
+
+    fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+            removeActiveClass();
+            const clickedButton = document.getElementById(`btn-${id}`);
+            clickedButton.classList.add("active");
+            displayVideos(data.category);
+        });
+}
+
+function displayCategories(categories) {
+    // get the container
+    const categoriesContainer = document.getElementById("category-container");
+    // loop operation on array of objects
+    for (let cat of categories) {
+        // console.log(cat);
+        // create elements
+        const categoryDiv = document.createElement("div");
+        categoryDiv.innerHTML = `
+        <button id="btn-${cat.category_id}"  onclick="loadCategoryVideos(${cat.category_id})" class="btn btn-sm hover:bg-[#FF1F3D]  hover:text-white">${cat.category}</button>
+        `;
+        // append the elements
+        categoriesContainer.append(categoryDiv);
+    }
+}
+
+
 
 // {
 //     "category_id": "1001",
@@ -40,28 +81,24 @@ function loadVideos() {
 // }
 
 
-function displayCategories(categories) {
-    // get the container
-    const categoriesContainer = document.getElementById("category-container");
-    // loop operation on array of objects
-    for (let cat of categories) {
-        // console.log(cat);
-        // create elements
-        const categoryDiv = document.createElement("div");
-        categoryDiv.innerHTML = `
-        <button class="btn btn-sm hover:bg-[#FF1F3D] hover:text-white">${cat.category}</button>
-        `;
-        // append the elements
-        categoriesContainer.append(categoryDiv);
-    }
-}
 
 const displayVideos = (videos) => {
 
     const videosContainer = document.getElementById("video-container");
+    videosContainer.innerHTML = "";
+
+    if (videos.length == 0) {
+        videosContainer.innerHTML = `
+        <div  class="col-span-full flex flex-col items-center justify-center py-20">
+            <img class="w-[120px]" src="Icon.png" alt="" srcset="">
+            <h2 class="text-2xl font-bold">Oops!! Sorry, There is no content here</h2>
+        </div>
+        `;
+        return;
+    }
 
     videos.forEach(video => {
-        console.log(video);
+        // console.log(video);
         const videoDiv = document.createElement("div");
 
         videoDiv.innerHTML = `
